@@ -1,0 +1,133 @@
+import geografia.*
+import vendedores.*
+
+// Provincias
+
+const buenosAires = new Provincia(nombre = "Buenos Aires", poblacion = 2890000)
+
+const cordoba = new Provincia(nombre = "Córdoba", poblacion = 13910000)
+
+const santaFe = new Provincia(nombre = "Santa Fe", poblacion = 3369000)
+
+const entreRios = new Provincia(nombre = "Entre Rios", poblacion = 1308000)
+
+// Ciudades
+
+const villaTesei = new Ciudad(nombre = "Villa Tesei", provincia = buenosAires)
+
+const ciudadCordoba = new Ciudad(nombre = "Ciudad de Córdoba", provincia = cordoba)
+
+const chivilcoy = new Ciudad(nombre = "Chivilcoy", provincia = buenosAires)
+
+const lobos = new Ciudad(nombre = "Lobos", provincia = buenosAires)
+
+const bragado = new Ciudad(nombre = "Bragado", provincia = buenosAires)
+
+const pergamino = new Ciudad(nombre = "Pergamino", provincia = buenosAires)
+
+const zarate = new Ciudad(nombre = "Zárate", provincia = buenosAires)
+
+const rosario = new Ciudad(nombre = "Rosario", provincia = santaFe)
+
+const rafaela = new Ciudad(nombre = "Rafaela", provincia = santaFe)
+
+const sanFrancisco = new Ciudad(nombre = "San Francisco", provincia = cordoba)
+
+const diamante = new Ciudad(nombre = "Diamante", provincia = entreRios)
+
+const amstrong = new Ciudad(nombre = "Amstrong", provincia = santaFe)
+
+// Ceritificados
+
+const certificado1 = new Certificado(sobreCantidadDePuntos = 10, sobreProductos = true)
+
+const certificado2 = new Certificado(sobreCantidadDePuntos = 20, sobreProductos = false)
+
+const certificado3 = new Certificado(sobreCantidadDePuntos = 5, sobreProductos = false)
+
+// Vendedor Fijo
+
+const miguel = new VendedorFijo (ciudadOrigen = villaTesei)
+
+// Vendedor Viajante
+
+const julio = new VendedorViajante()
+
+// Comercio Corresponsal
+
+const comercio = new ComercioCorresponsal()
+
+describe "Test vendedores: Primera parte." {
+
+	fixture {
+		
+		// Le das los certificados a Miguel
+		miguel.darCertificado(certificado1)
+		miguel.darCertificado(certificado2)
+		miguel.darCertificado(certificado3)
+		
+		// Se habilita a Julio para trabajar en Buenos Aires
+		julio.habilitarEnProvincia(buenosAires)
+		
+		// Se establece una sucursal en Villa Tesei
+		comercio.ponerSucursalEn(villaTesei)
+	}
+
+	test "Pueden trabajar en Villa Tesei y no en Ciudad de Cordoba" {
+		
+		assert.that(miguel.puedeTrabajarEn(villaTesei))
+		assert.that(julio.puedeTrabajarEn(villaTesei))
+		assert.that(comercio.puedeTrabajarEn(villaTesei))
+		assert.notThat(miguel.puedeTrabajarEn(ciudadCordoba))
+		assert.notThat(julio.puedeTrabajarEn(ciudadCordoba))
+		assert.notThat(comercio.puedeTrabajarEn(ciudadCordoba))
+	}
+
+	test "Solo miguel es vendedor vertasil." {
+		
+		assert.that(miguel.esVersatil())
+		assert.notThat(julio.esVersatil())
+		assert.notThat(comercio.esVersatil())
+	}
+
+	test "Solo miguel es firme" {
+		
+		assert.that(miguel.esFirme())
+		assert.equals(35, miguel.puntajeTotalDeCertificados())
+		assert.notThat(julio.esFirme())
+		assert.notThat(comercio.esFirme())
+	}
+
+}
+
+describe "Test vendedores: Segunda parte" {
+	
+	fixture{
+		julio.habilitarEnProvincia(santaFe)
+		julio.habilitarEnProvincia(buenosAires)
+	}
+	
+	test "Ningún vendedor fijo es influyente."{
+		assert.notThat(miguel.vendedorInfluyente())
+	}
+	
+	test "Viajante es influyente."{
+		assert.notThat(julio.vendedorInfluyente())
+		assert.equals(6259000,julio.poblacionTotal())
+	}
+	
+	test "Si, Es comercio influyente por cantidad de ciudades." {
+		comercio.ponerSucursalesEn([ chivilcoy, lobos, bragado, pergamino, zarate ])
+		assert.that(comercio.vendedorInfluyente())
+	}
+
+	test "Si, Es comercio influyente por cantidad de provincias." {
+		comercio.ponerSucursalesEn([ rosario, rafaela, sanFrancisco, diamante ])
+		assert.that(comercio.vendedorInfluyente())
+	}
+	
+	test "No es comercio influyente." {
+		comercio.ponerSucursalesEn([ rosario, rafaela, amstrong, diamante ])
+		assert.notThat(comercio.vendedorInfluyente())
+	}
+}
